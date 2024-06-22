@@ -5,14 +5,16 @@
 #include "cliente.h"
 #include "quarto.h"
 
+// Função para cadastrar uma nova estadia.
 void cadastrarEstadia() {
     Estadia estadia;
-    FILE *file = fopen("data/estadias.dat", "ab");
+    FILE *file = fopen("data/estadias.dat", "ab"); // Abre o arquivo de estadias em modo de adição binária.
     if (file == NULL) {
         printf("Erro ao abrir o arquivo de estadias!\n");
         return;
     }
 
+    // Solicita e lê os dados da nova estadia.
     printf("Código da estadia: ");
     scanf("%d", &estadia.codigo);
     printf("Data de entrada (dd/mm/yyyy): ");
@@ -26,9 +28,9 @@ void cadastrarEstadia() {
     printf("Número do quarto: ");
     scanf("%d", &estadia.numeroQuarto);
 
-    // Atualiza status do quarto para ocupado
+    // Atualiza o status do quarto para "ocupado".
     Quarto quarto;
-    FILE *fileQuarto = fopen("data/quartos.dat", "rb+");
+    FILE *fileQuarto = fopen("data/quartos.dat", "rb+"); // Abre o arquivo de quartos em modo de leitura/escrita binária.
     while (fread(&quarto, sizeof(Quarto), 1, fileQuarto)) {
         if (quarto.numero == estadia.numeroQuarto) {
             strcpy(quarto.status, "ocupado");
@@ -39,18 +41,20 @@ void cadastrarEstadia() {
     }
     fclose(fileQuarto);
 
+    // Escreve a nova estadia no arquivo de estadias.
     fwrite(&estadia, sizeof(Estadia), 1, file);
     fclose(file);
     printf("Estadia cadastrada com sucesso!\n");
 }
 
+// Função para dar baixa em uma estadia existente.
 void darBaixaEstadia() {
     int codigo;
     printf("Código da estadia para dar baixa: ");
     scanf("%d", &codigo);
 
     Estadia estadia;
-    FILE *file = fopen("data/estadias.dat", "rb+");
+    FILE *file = fopen("data/estadias.dat", "rb+"); // Abre o arquivo de estadias em modo de leitura/escrita binária.
     if (file == NULL) {
         printf("Erro ao abrir o arquivo de estadias!\n");
         return;
@@ -60,9 +64,9 @@ void darBaixaEstadia() {
     while (fread(&estadia, sizeof(Estadia), 1, file)) {
         if (estadia.codigo == codigo) {
             found = 1;
-            // Atualiza status do quarto para livre
+            // Atualiza o status do quarto para "livre".
             Quarto quarto;
-            FILE *fileQuarto = fopen("data/quartos.dat", "rb+");
+            FILE *fileQuarto = fopen("data/quartos.dat", "rb+"); // Abre o arquivo de quartos em modo de leitura/escrita binária.
             while (fread(&quarto, sizeof(Quarto), 1, fileQuarto)) {
                 if (quarto.numero == estadia.numeroQuarto) {
                     strcpy(quarto.status, "livre");
@@ -77,8 +81,8 @@ void darBaixaEstadia() {
     }
 
     if (found) {
-        // Remove a estadia do arquivo
-        FILE *tempFile = fopen("data/temp.dat", "wb");
+        // Remove a estadia do arquivo.
+        FILE *tempFile = fopen("data/temp.dat", "wb"); // Cria um arquivo temporário para armazenar as estadias restantes.
         rewind(file);
         while (fread(&estadia, sizeof(Estadia), 1, file)) {
             if (estadia.codigo != codigo) {
@@ -87,8 +91,8 @@ void darBaixaEstadia() {
         }
         fclose(file);
         fclose(tempFile);
-        remove("data/estadias.dat");
-        rename("data/temp.dat", "data/estadias.dat");
+        remove("data/estadias.dat"); // Remove o arquivo antigo.
+        rename("data/temp.dat", "data/estadias.dat"); // Renomeia o arquivo temporário para o nome do arquivo original.
         printf("Estadia baixada com sucesso!\n");
     } else {
         fclose(file);
@@ -96,15 +100,17 @@ void darBaixaEstadia() {
     }
 }
 
+// Função para consultar todas as estadias registradas.
 void consultarEstadias() {
     Estadia estadia;
-    FILE *file = fopen("data/estadias.dat", "rb");
+    FILE *file = fopen("data/estadias.dat", "rb"); // Abre o arquivo de estadias em modo de leitura binária.
     if (file == NULL) {
         printf("Erro ao abrir o arquivo de estadias!\n");
         return;
     }
 
     printf("\nLista de Estadias:\n");
+    // Lê e exibe cada estadia registrada no arquivo.
     while (fread(&estadia, sizeof(Estadia), 1, file)) {
         printf("Código: %d\n", estadia.codigo);
         printf("Data de entrada: %s\n", estadia.dataEntrada);
